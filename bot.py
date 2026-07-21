@@ -1,42 +1,62 @@
 import os
-import discord
+from threading import Thread
 from discord.ext import commands
+import discord
+from flask import Flask
 
+# 1. Mini serveur web pour éviter le problème de Time Out sur Render
+app = Flask('')
+
+
+@app.route('/')
+def home():
+  return 'Bot is running and alive!'
+
+
+def run():
+  app.run(host='0.0.0.0', port=8080)
+
+
+def keep_alive():
+  t = Thread(target=run)
+  t.start()
+
+
+# Démarrer le serveur en premier
+keep_alive()
+
+# 2. Configuration du bot et des commandes
 intents = discord.Intents.default()
 intents.message_content = True
-intents.members = True
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"تم تسجيل الدخول بنجاح باسم: {bot.user.name}")
-    print("البوت يعمل بكامل طاقته وجاهز لسيرفر BAC 2027!")
+  print(f'Logged in as {bot.user.name}')
 
-# 1. أمر التوقيت والشامل (يديه لقناة الإعلانات تاع التواقيت، الاختبارات، والعطل)
-@bot.command()
-async def tawkit(ctx):
-    # تقدر تبدل الرابط هذا برابط قناة الإعلانات الحقيقي في سرڤرك
-    announcement_link = "https://discord.com/channels/YOUR_SERVER_ID/YOUR_CHANNEL_ID"
-    
-    await ctx.send(
-        f"أهلاً بك يا {ctx.author.mention} 📅\n"
-        "للإطلاع على **التوقيت الدراسي، توقيت الاختبارات، والعطل المدرسية الرسمية**، تفضل بزيارة قناة الإعلانات:\n"
-        f"👉 {announcement_link}\n\n"
-        "بالتوفيق لجميع الطلبة في مشوار BAC 2027! 🔥"
-    )
 
-# 2. أمر نتائج البكالوريا والوثائق الرسمية
+# --- Vos commandes personnalisées ---
+
+
 @bot.command()
 async def resultat(ctx):
-    await ctx.send(f"📊 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية يا {ctx.author.mention}")
-    await ctx.send("https://i.ibb.co/7453566/resultat.jpg")
+  await ctx.send(
+      "قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\n الثانوية: عبد"
+      " المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية"
+  )
+  await ctx.send('https://i.ibb.co/7453566/resultat.jpg')
 
-# 3. أمر مواضيع السوجيات
+
 @bot.command()
-async def sujet(ctx, *, matiere="الرياضيات"):
-    await ctx.send(f"📚 **آخر المواضيع والسوجيات لمادة ({matiere}) لـ BAC 2027:**\nتجدون أحدث السوجيات في قناة الإعلانات بالتوفيق!")
+async def sujet(ctx, *, matiere='الرياضيات'):
+  await ctx.send(
+      f'إجدون أحدث السوجيات في قناة الإعلانات بالتوفيق**\nBAC 2027: لـ'
+      f' **{matiere}** آخر المواضيع والسوجيات'
+  )
 
-bot.run(os.getenv("DISCORD_TOKEN"))
+
+# Lancement du bot avec le token enregistré dans Render
+bot.run(os.getenv('DISCORD_TOKEN'))
     
 
