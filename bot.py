@@ -37,4 +37,8 @@ async def schedule(ctx):
     except discord.Forbidden:
         await ctx.send(f"Udhran ya {ctx.author.mention}, rasailuka al-khassa mughlaqa (DM closed).")
 
+@bot.command()
+async def tawkit(ctx):
+    await ctx.send("Bienvenue ! L'emploi du temps est disponible dans le salon des annonces, ou vous pouvez consulter votre planning pour le BAC 2027.")
 bot.run(os.getenv("DISCORD_TOKEN"))
+
