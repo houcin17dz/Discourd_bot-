@@ -37,22 +37,7 @@ async def schedule(ctx):
     except discord.Forbidden:
         await ctx.send(f"Udhran ya {ctx.author.mention}, rasailuka al-khassa mughlaqa (DM closed).")
 
-@bot.command()
-async def tawkit(ctx):
-    await ctx.send("Bienvenue ! L'emploi du temps est disponible dans le salon des annonces, ou vous pouvez consulter votre planning pour le BAC 2027.")
-@bot.event
-async def on_message(message):
-    # باش البوت ما يردش على روحه ويخلق حلقة لا نهائية
-    if message.author == bot.user:
-        return
 
-    # إذا أي واحد ذكر اسم البوت (Mention) في الرسالة تاعو
-    if bot.user.mentioned_in(message):
-        # نقدروا نردوا عليه ونذكروا السؤال تاعو
-        question_text = message.content.replace(f'<@!{bot.user.id}>', '').replace(f'<@{bot.user.id}>', '').strip()
-        await message.channel.send(f"أهلاً بك يا {message.author.mention}! لقد استقبلنا سؤالك: **{question_text}** وسيتم الرد عليك قريباً بخصوص المواضيع أو السوجيات الخاصة بـ BAC 2027.")
 
-    # هذه ضرورية باش الأوامر الأخرى تبقى تمشي عادي
-    await bot.process_commands(message)
 bot.run(os.getenv("DISCORD_TOKEN"))
 
