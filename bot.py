@@ -36,4 +36,4 @@ async def schedule(ctx):
     except discord.Forbidden:
         await ctx.send(f"Udhran ya {ctx.author.mention}, rasailuka al-khassa mughlaqa (DM closed).")
 
-bot.run("MTUyOTEYODA5MjY2MzI4Mzky.GmtOVf.paHJpJWIHw1agtxt9jxXGNn_KqMc_xqOkI4CM")
+bot.run(os.getenv("DISCORD_TOKEN"))
