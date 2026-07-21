@@ -19,16 +19,13 @@ async def tawkit(ctx):
 
 @bot.command()
 async def resultat(ctx):
-    try:
-        await ctx.author.send("📊 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية.")
-        await ctx.author.send("https://i.ibb.co/7453566/resultat.jpg")
-        await ctx.send(f"تم إرسال الوثيقة إلى رسائلك الخاصة يا {ctx.author.mention} 📥")
-    except discord.Forbidden:
-        await ctx.send(f"عذراً يا {ctx.author.mention}، رسائلك الخاصة مغلقة (DM closed).")
+    await ctx.send(f"📊 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية يا {ctx.author.mention}")
+    await ctx.send("https://i.ibb.co/7453566/resultat.jpg")
 
 @bot.command()
 async def sujet(ctx, *, matiere="الرياضيات"):
     await ctx.send(f"📚 **آخر المواضيع والسوجيات لمادة ({matiere}) لـ BAC 2027:**\nتجدون أحدث السوجيات في قناة الإعلانات بالتوفيق!")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+    
 
