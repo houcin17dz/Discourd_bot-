@@ -2,42 +2,39 @@ import os
 import discord
 from discord.ext import commands
 
+# إعداد الصلاحيات (Intents)
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-intents.presences = True
 
+# تعريف البوت مع الرمز الخاص بالأوامر
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("Bot is ready and running for BAC 2027!")
+    print(f"تم تسجيل الدخول بنجاح باسم: {bot.user.name} (ID: {bot.user.id})")
+    print("البوت يعمل بكامل طاقته وجاهز لسيرفر BAC 2027!")
 
+# 1. أمر التوقيت الدراسي
 @bot.command()
-async def hello(ctx):
-    await ctx.send("Marhaban bik ya batal fi server BAC 2027! Bot yaamal bi najah.")
+async def tawkit(ctx):
+    await ctx.send(f"أهلاً بك يا {ctx.author.mention}!\n📅 **التوقيت الدراسي الرسمي لسرڤر BAC 2027:**\n- **الصباح:** المراجعة وحل التمارين.\n- **المساء:** حفظ المواد الأدبية.\nC'est parti ya batal!")
 
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-
-    msg = message.content.lower()
-    if "tawkit" in msg or "jadwal" in msg or "timing" in msg:
-        await message.channel.send(f"Ahlan bik ya {message.author.mention}! Tawkit dirasi mawjoud fi qanat al-i'lanat, aw iktib amr !schedule liyasilka fi al-khass.")
-
-    await bot.process_commands(message)
-
+# 2. أمر نتائج البكالوريا والوثائق الرسمية
 @bot.command()
-async def schedule(ctx):
+async def resultat(ctx):
     try:
-        await ctx.author.send("📅 Ilayka attawkit addirasi rrasmi liserver BAC 2027:\n- Sabahan: Al-muraja'a wa hall attamarīn\n- Masa'an: Hifd al-mawadd al-adabiyya\nC'est parti ya batal!")
-        await ctx.send(f"Tamma irsal attawkit ila risailika al-khassa ya {ctx.author.mention} 📩")
+        await ctx.author.send("📊 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية.")
+        await ctx.author.send("https://i.ibb.co/7453566/resultat.jpg") # رابط الوثيقة اللي حطيتها
+        await ctx.send(f"تم إرسال تفاصيل النتائج والوثيقة إلى رسائلك الخاصة يا {ctx.author.mention} 📥")
     except discord.Forbidden:
-        await ctx.send(f"Udhran ya {ctx.author.mention}, rasailuka al-khassa mughlaqa (DM closed).")
+        await ctx.send(f"عذراً يا {ctx.author.mention}، رسائلك الخاصة مغلقة (DM closed)، يرجى فتحها لتلقي الوثيقة.")
 
+# 3. أمر مواضيع السوجيات (رياضيات والمواد الأخرى)
+@bot.command()
+async def sujet(ctx, *, matiere="الرياضيات"):
+    await ctx.send(f"📚 **آخر المواضيع والسوجيات الخاصة بمادة ({matiere}) لـ BAC 2027:**\nتجدون أحدث السوجيات والتمارين المصححة في قناة الإعلانات والملفات المخصصة لكل مادة. بالتوفيق للجميع!")
 
-
+# تشغيل البوت باستخدام الرمز السري من منصة Render
 bot.run(os.getenv("DISCORD_TOKEN"))
 
