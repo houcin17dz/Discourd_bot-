@@ -38,27 +38,30 @@ async def on_ready():
   print(f'Logged in as {bot.user.name}')
 
 
-# --- دالة مساعدة للبحث عن قناة announcements تلقائياً ---
-async def send_to_announcements(guild, content, file_url=None):
+# --- دالة ذكية لإرسال الرسائل (إلى قناة الإعلانات أو للخاص/الشات الحالي مباشرة) ---
+async def send_smart(ctx_or_message, content, file_url=None):
+  guild = getattr(ctx_or_message, 'guild', None)
+  channel = getattr(ctx_or_message, 'channel', ctx_or_message)
+
   target_channel = None
-  for channel in guild.text_channels:
-    if (
-        'announcement' in channel.name.lower()
-        or 'إعلان' in channel.name
-        or 'انونسمنت' in channel.name
-    ):
-      target_channel = channel
-      break
+  if guild:
+    for ch in guild.text_channels:
+      if (
+          'announcement' in ch.name.lower()
+          or 'إعلان' in ch.name
+          or 'انونسمنت' in ch.name
+      ):
+        target_channel = ch
+        break
 
-  if target_channel:
-    await target_channel.send(content)
-    if file_url:
-      await target_channel.send(file_url)
-    return target_channel
-  return None
+  dest = target_channel if target_channel else channel
+
+  await dest.send(content)
+  if file_url:
+    await dest.send(file_url)
 
 
-# --- 3. نظام الردود الذكية والأوامر الشاملة ---
+# --- 3. نظام الردود الذكية ---
 @bot.event
 async def on_message(message):
   if message.author == bot.user:
@@ -66,23 +69,9 @@ async def on_message(message):
 
   text = message.content.lower()
 
-  # الرد على أسئلة النتائج
-  if (
-      'نتائج الباك' in text
-      or 'اللوحة' in text
-      or 'نتيجة' in text
-      or 'resultat' in text
-  ):
-    await send_to_announcements(
-        message.guild,
-        '📌 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد'
-        ' المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية',
-        'https://i.ibb.co/7453566/resultat.jpg',
-    )
-  # الترحيب
-  elif 'سلام' in text or 'اهلا' in text or 'hi' in text:
+  if 'سلام' in text or 'اهلا' in text or 'hi' in text:
     await message.channel.send(
-        'وعليكم السلام يا بطل! ⚡ كيف يمكنني مساعدتك اليوم في السيرفر؟'
+        'وعليكم السلام يا بطل! ⚡ كيف يمكنني مساعدتك اليوم؟'
     )
   elif 'شكون انت' in text or 'من أنت' in text:
     await message.channel.send(
@@ -99,62 +88,54 @@ async def on_message(message):
   await bot.process_commands(message)
 
 
-# --- الأوامر الجديدة والقديمة كاملة ---
+# --- الأوامر باللغة العربية بالكامل ---
 
 
-@bot.command()
-async def resultat(ctx):
-  await send_to_announcements(
-      ctx.guild,
+@bot.command(name='نتائج')
+async def resultat_cmd(ctx):
+  await send_smart(
+      ctx,
       '📌 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد'
       ' المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية',
       'https://i.ibb.co/7453566/resultat.jpg',
   )
-  await ctx.send('✅ تم نشر النتائج في قناة الإعلانات!')
 
 
-@bot.command()
-async def sujet(ctx, *, matiere='الرياضيات'):
+@bot.command(name='سوجيات')
+async def sujet_cmd(ctx, *, matiere='الرياضيات'):
   content = (
       f'📚 **أحدث السوجيات والمواضيع لـ BAC 2027**\nالمادة: **{matiere}**\nتجدون'
       ' الملفات والمواضيع في قناة الإعلانات بالتوفيق للجميع!'
   )
-  await send_to_announcements(ctx.guild, content)
-  await ctx.send(f'✅ تم نشر سوجي {matiere} في قناة الإعلانات!')
+  await send_smart(ctx, content)
 
 
-@bot.command()
-async def توقيت(ctx):
+@bot.command(name='توقيت')
+async def tawkit_cmd(ctx):
   content = (
       '⏰ **التوقيت الدراسي الرسمي لبداية الموسم:**\n'
       '- الفترة الصباحية: 08:00 صباحاً - 12:00 ظهراً\n'
-      '- الفترة المسائية: 13:30 ظهراً - 17:00 مساءً\n'
-      '*(راجع قناة الإعلانات لأي تعديلات جديدة)*'
+      '- الفترة المسائية: 13:30 ظهراً - 17:00 مساءً'
   )
-  await send_to_announcements(ctx.guild, content)
-  await ctx.send('✅ تم نشر التوقيت الدراسي في قناة الإعلانات!')
+  await send_smart(ctx, content)
 
 
-@bot.command()
-async def اختبارات(ctx):
+@bot.command(name='اختبارات')
+async def ikhtibarat_cmd(ctx):
   content = (
-      '📅 **جدول الاختبارات والفروض الرسمية:**\n'
-      'تم إدراج جدول الفروض والاختبارات الخاصة بالفصول الثلاثة في قناة'
-      ' الإعلانات. بالتوفيق لكل التلاميذ!'
+      '📅 **جدول الاختبارات والفروض الرسمية:**\nتم إدراج جدول الفروض والاختبارات'
+      ' الخاصة بالفصول الثلاثة.'
   )
-  await send_to_announcements(ctx.guild, content)
-  await ctx.send('✅ تم نشر جدول الاختبارات في قناة الإعلانات!')
+  await send_smart(ctx, content)
 
 
-@bot.command()
-async def وزارة(ctx):
+@bot.command(name='وزارة')
+async def wizarat_cmd(ctx):
   content = (
-      '📢 **أحدث إعلانات وزارة التربية الوطنية:**\n'
-      'أي منشور أو قرار جديد صادر عن الوزارة سيتم وضعه هنا فوراً في قناة'
-      ' الإعلانات المخصصة.'
+      '📢 **أحدث إعلانات وزارة التربية الوطنية:**\nأي منشور أو قرار جديد صادر'
+      ' عن الوزارة سيتم وضعه هنا فوراً.'
   )
-  await send_to_announcements(ctx.guild, content)
-  await ctx.send('✅ تم نشر المستجدات الرسمية في قناة الإعلانات!')
+  await send_smart(ctx, content)
 
 
 bot.run(os.getenv('DISCORD_TOKEN'))
