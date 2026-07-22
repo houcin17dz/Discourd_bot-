@@ -38,12 +38,14 @@ async def on_ready():
   print(f'Logged in as {bot.user.name}')
 
 
-# --- دالة ذكية لإرسال الرسائل (إلى قناة الإعلانات أو للخاص/الشات الحالي مباشرة) ---
+# --- دالة ذكية وآمنة 100% لتفادي مشاكل الخاص والسيرفر ---
 async def send_smart(ctx_or_message, content, file_url=None):
-  guild = getattr(ctx_or_message, 'guild', None)
+  # تحديد القناة التي تم الإرسال منها مباشرة
   channel = getattr(ctx_or_message, 'channel', ctx_or_message)
+  guild = getattr(ctx_or_message, 'guild', None)
 
   target_channel = None
+  # البحث عن قناة الإعلانات فقط إذا كنا داخل سيرفر
   if guild:
     for ch in guild.text_channels:
       if (
@@ -54,6 +56,7 @@ async def send_smart(ctx_or_message, content, file_url=None):
         target_channel = ch
         break
 
+  # إذا وجدنا قناة الإعلانات في السيرفر نبعث لها، وإذا رانا في الخاص نبعث في نفس الشات الحالي
   dest = target_channel if target_channel else channel
 
   await dest.send(content)
