@@ -38,66 +38,123 @@ async def on_ready():
   print(f'Logged in as {bot.user.name}')
 
 
-# --- 3. نظام الردود الذكية المتطور (يتكلم كي البنادم) ---
+# --- دالة مساعدة للبحث عن قناة announcements تلقائياً ---
+async def send_to_announcements(guild, content, file_url=None):
+  target_channel = None
+  for channel in guild.text_channels:
+    if (
+        'announcement' in channel.name.lower()
+        or 'إعلان' in channel.name
+        or 'انونسمنت' in channel.name
+    ):
+      target_channel = channel
+      break
+
+  if target_channel:
+    await target_channel.send(content)
+    if file_url:
+      await target_channel.send(file_url)
+    return target_channel
+  return None
+
+
+# --- 3. نظام الردود الذكية والأوامر الشاملة ---
 @bot.event
 async def on_message(message):
   if message.author == bot.user:
     return
 
-  text = message.content.lower()  # تحويل النص إلى حروف صغيرة لتحليلها بسهولة
+  text = message.content.lower()
 
-  # التحقق مما إذا كان المستخدم يكلم البوت أو يسأله أسئلة معينة
-  if "نتائج الباك" in text or "اللوحة" in text or "موليور" in text:
-    await message.channel.send(
-        "📚 قوائم الناجحين الرسمية لشهادة البكالوريا متوفرة في قناة"
-        " الإعلانات الخاصة بسيرفر BAC 2027 بالتوفيق للجميع!"
+  # الرد على أسئلة النتائج
+  if (
+      'نتائج الباك' in text
+      or 'اللوحة' in text
+      or 'نتيجة' in text
+      or 'resultat' in text
+  ):
+    await send_to_announcements(
+        message.guild,
+        '📌 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد'
+        ' المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية',
+        'https://i.ibb.co/7453566/resultat.jpg',
     )
-  elif "سلام" in text or "اهلا" in text or "hi" in text or "hello" in text:
+  # الترحيب
+  elif 'سلام' in text or 'اهلا' in text or 'hi' in text:
     await message.channel.send(
-        "وعليكم السلام يا بطل! ⚡ كيف يمكنني مساعدتك اليوم في دراستك أو"
-        " سيرفر الباك؟"
+        'وعليكم السلام يا بطل! ⚡ كيف يمكنني مساعدتك اليوم في السيرفر؟'
     )
-  elif "شكون انت" in text or "من أنت" in text:
+  elif 'شكون انت' in text or 'من أنت' in text:
     await message.channel.send(
-        "أنا **Le Mentor**، مساعدك الشخصي الذكي لتنظيم الدراسة ومرافقتك نحو"
-        " نجاح البكالوريا! 🎯"
-    )
-  elif "مساعدة" in text or "help" in text:
-    await message.channel.send(
-        "🛠️ الأوامر المتوفرة حالياً:\n- `!resultat`: لعرض نتائج الباك.\n- `!sujet"
-        " [المادة]`: للحصول على أحدث السوجيات.\n- أو يمكنك محادثتي مباشرة هنا"
-        " وسأرد عليك!"
+        'أنا **Le Mentor**، مساعدك الشخصي لتنظيم الدراسة ومرافقتك نحو البكالوريا!'
+        ' 🎯'
     )
   else:
-    # رد ذكي افتراضي بدل تكرار الكلام الحرفي
-    await message.channel.send(
-        f"أهلاً بك! لقد فهمت سؤالك، تابع قناة الإعلانات أو اكتب `!help` لمعرفة"
-        " كيف أستطيع مساعدتك أكثر 🚀"
-    )
+    if not message.content.startswith('!'):
+      await message.channel.send(
+          'أهلاً بك! لقد فهمت رسالتك، تابع قناة الإعلانات أو اكتب `!help` لمعرفة'
+          ' الأوامر المتاحة 🚀'
+      )
 
-  # ضروري لتشغيل الأوامر مثل !resultat و !sujet
   await bot.process_commands(message)
 
 
-# --- الأوامر المخصصة ---
+# --- الأوامر الجديدة والقديمة كاملة ---
 
 
 @bot.command()
 async def resultat(ctx):
-  await ctx.send(
-      "قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\n الثانوية: عبد"
-      " المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية"
+  await send_to_announcements(
+      ctx.guild,
+      '📌 **قوائم الناجحين الرسمية - شهادة البكالوريا دورة 2026**\nالثانوية: عبد'
+      ' المؤمن بن علي - الإدريسية\nالشعبة: تقني رياضي هندسة مدنية',
+      'https://i.ibb.co/7453566/resultat.jpg',
   )
-  await ctx.send("https://i.ibb.co/7453566/resultat.jpg")
+  await ctx.send('✅ تم نشر النتائج في قناة الإعلانات!')
 
 
 @bot.command()
-async def sujet(ctx, *, matiere="الرياضيات"):
-  await ctx.send(
-      f"إجدون أحدث السوجيات في قناة الإعلانات بالتوفيق**\nBAC 2027: لـ"
-      f" **{matiere}** آخر المواضيع والسوجيات"
+async def sujet(ctx, *, matiere='الرياضيات'):
+  content = (
+      f'📚 **أحدث السوجيات والمواضيع لـ BAC 2027**\nالمادة: **{matiere}**\nتجدون'
+      ' الملفات والمواضيع في قناة الإعلانات بالتوفيق للجميع!'
   )
+  await send_to_announcements(ctx.guild, content)
+  await ctx.send(f'✅ تم نشر سوجي {matiere} في قناة الإعلانات!')
 
 
-bot.run(os.getenv("DISCORD_TOKEN"))
+@bot.command()
+async def توقيت(ctx):
+  content = (
+      '⏰ **التوقيت الدراسي الرسمي لبداية الموسم:**\n'
+      '- الفترة الصباحية: 08:00 صباحاً - 12:00 ظهراً\n'
+      '- الفترة المسائية: 13:30 ظهراً - 17:00 مساءً\n'
+      '*(راجع قناة الإعلانات لأي تعديلات جديدة)*'
+  )
+  await send_to_announcements(ctx.guild, content)
+  await ctx.send('✅ تم نشر التوقيت الدراسي في قناة الإعلانات!')
 
+
+@bot.command()
+async def اختبارات(ctx):
+  content = (
+      '📅 **جدول الاختبارات والفروض الرسمية:**\n'
+      'تم إدراج جدول الفروض والاختبارات الخاصة بالفصول الثلاثة في قناة'
+      ' الإعلانات. بالتوفيق لكل التلاميذ!'
+  )
+  await send_to_announcements(ctx.guild, content)
+  await ctx.send('✅ تم نشر جدول الاختبارات في قناة الإعلانات!')
+
+
+@bot.command()
+async def وزارة(ctx):
+  content = (
+      '📢 **أحدث إعلانات وزارة التربية الوطنية:**\n'
+      'أي منشور أو قرار جديد صادر عن الوزارة سيتم وضعه هنا فوراً في قناة'
+      ' الإعلانات المخصصة.'
+  )
+  await send_to_announcements(ctx.guild, content)
+  await ctx.send('✅ تم نشر المستجدات الرسمية في قناة الإعلانات!')
+
+
+bot.run(os.getenv('DISCORD_TOKEN'))
